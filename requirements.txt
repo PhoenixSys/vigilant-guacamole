@@ -1,0 +1,8 @@
+Django>=4.2,<5.0
+gunicorn>=20.0,<21.0
+psycopg2-binary>=2.9,<3.0
+googlesearch-python>=1.2.3
+python-decouple>=3.8
+Pillow>=9.0,<11.0
+requests>=2.20,<3.0
+beautifulsoup4>=4.9,<5.0
