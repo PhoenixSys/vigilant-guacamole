@@ -17,10 +17,25 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import RedirectView
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
-    path('accounts/', include('django.contrib.auth.urls')),
+    path('accounts/', include('django.contrib.auth.urls')), # For login, logout, password change
     path('favicon.ico', RedirectView.as_view(url='/static/favicon.ico', permanent=True)),
+    # Other app urls can go here
 ]
+
+# Serve media files during development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# It's good practice to also add a root path if not already present,
+# for example, redirecting to the main app's home or a dedicated landing page.
+# from django.views.generic import RedirectView
+# urlpatterns += [path('', RedirectView.as_view(url='/accounts/', permanent=True)),]
+# Or, if you have a site-wide landing page that's not in 'accounts':
+# from my_main_app import views as main_views
+# urlpatterns += [path('', main_views.landing_page, name='landing_page'),]

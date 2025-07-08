@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config, Csv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-xjennrd%n-mf&-y3*yi5jejs(gm_g#arr5ds)n=v3z(c^m4kx^'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DJANGO_DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS', default='127.0.0.1,localhost', cast=Csv())
 
 
 # Application definition
@@ -122,9 +123,78 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
+# Media files (uploads)
+# https://docs.djangoproject.com/en/4.2/topics/files/
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL = '/accounts/login_redirect/'
+
+
+# Email Configuration
+# In development, emails will be printed to the console.
+# For production, set these in your .env file with actual SMTP server details.
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = config('EMAIL_HOST', default='')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='webmaster@localhost') # Change as appropriate
+SERVER_EMAIL = config('SERVER_EMAIL', default='root@localhost') # For error reports, etc.
+ADMINS = [('Admin', config('ADMIN_EMAIL', default='admin@example.com'))] # For site admins to receive error notifications
+MANAGERS = ADMINS
+
+# Logging Configuration
+# Basic setup to log to console. For production, consider file-based logging, rotation, etc.
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO', # Adjust as needed (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        # Example file handler (uncomment and configure for production)
+        # 'file': {
+        #     'level': 'WARNING',
+        #     'class': 'logging.FileHandler',
+        #     'filename': BASE_DIR / 'django_app.log',
+        #     'formatter': 'verbose',
+        # },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'], # Add 'file' here for file logging
+            'level': config('DJANGO_LOG_LEVEL', default='INFO'), # Control Django's own logging level
+            'propagate': True,
+        },
+        'accounts': { # Example: logger for your 'accounts' app
+            'handlers': ['console'], # Add 'file' here for file logging
+            'level': config('APP_LOG_LEVEL', default='INFO'), # Control your app's logging level
+            'propagate': False, # Don't propagate to parent 'django' logger if handling here
+        },
+        # Add other app loggers as needed
+    },
+    'root': { # Catch-all for other loggers
+        'handlers': ['console'],
+        'level': 'WARNING',
+    }
+}
