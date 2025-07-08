@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Web Search{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2 class="mb-4">Web Search</h2>
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" name="query" placeholder="Enter your search query..." value="{{ query }}">
+                        <button class="btn btn-primary" type="submit">Search</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if results %}
+            <div class="mt-4">
+                <h3>Results for "{{ query }}"</h3>
+                <div class="list-group">
+                    {% for result in results %}
+                        <a href="{{ result }}" class="list-group-item list-group-item-action" target="_blank">
+                            {{ result }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
